@@ -1,8 +1,7 @@
 # NetPractise
 
-NetPractice is a general practical exercise to let you discover networking.
+NetPractise is a general practical exercise to let you discover networking.
  
 ## State
 
-![netpractise Score](https://img.shields.io/badge/Score-Na-grey?style=for-the-badge)
-    
+![NetPractise Score](https://img.shields.io/badge/Score-N/A-grey?style=for-the-badge)
