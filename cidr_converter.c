@@ -6,10 +6,11 @@
 /*   By: otodd <otodd@student.42london.com>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/11 18:01:21 by otodd             #+#    #+#             */
-/*   Updated: 2024/11/11 19:33:55 by otodd            ###   ########.fr       */
+/*   Updated: 2024/11/12 14:11:49 by otodd            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
+#include <math.h>
 #include <stdio.h>
 #include <stddef.h>
 #include <bsd/string.h>
@@ -148,5 +149,6 @@ int	main(int argc, char **argv)
 		return (EXIT_FAILURE);
 	}
 	printf("%s has a subnet mask: /%d\n", ipv4_str, ret);
+	printf("Number of possible hosts: %d\n", ((int)pow(2, 32 - ret) - 2));
 	return (EXIT_SUCCESS);
 }
