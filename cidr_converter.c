@@ -6,7 +6,7 @@
 /*   By: otodd <otodd@student.42london.com>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/11 18:01:21 by otodd             #+#    #+#             */
-/*   Updated: 2024/11/12 14:11:49 by otodd            ###   ########.fr       */
+/*   Updated: 2024/11/12 16:36:11 by otodd            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -134,21 +134,113 @@ static int	ipv4_do(char *str)
 	return (count);
 }
 
+static char	*ipv4_do_mask(char *str, char *str2)
+{
+	size_t	c;
+	int		ip[4];
+	char	*head;
+	char	**ipv4;
+	char	**a_head;
+	int		n;
+	char	*head2;
+	char	**mask;
+	char	**a_head2;
+	int		n2;
+	int		i;
+	char	*s;
+
+	c = 0;
+	head = str;
+	head2 = str2;
+	while (*head)
+	{
+		if (*head == '.' && (*(head + 1) && *(head + 1) != '.')
+			&& (*head >= '0' || *head <= '9' || *head == '0'))
+			c++;
+		head++;
+	}
+	if (c != 3)
+		return (NULL);
+	c = 0;
+	head = str;
+	while (*head2)
+	{
+		if (*head2 == '.' && (*(head2 + 1) && *(head2 + 1) != '.')
+			&& (*head2 >= '0' || *head2 <= '9' || *head2 == '0'))
+			c++;
+		head2++;
+	}
+	if (c != 3)
+		return (NULL);
+	ipv4 = ft_split(str, '.');
+	mask = ft_split(str2, '.');
+	a_head = ipv4;
+	a_head2 = mask;
+	i = 0;
+	while (*ipv4 && *mask)
+	{
+		n = atoi(*ipv4);
+		n2 = atoi(*mask);
+		if ((n > 255 && n != -1) && (n2 > 255 && n2 != -1))
+		{
+			ft_free_array(a_head, 4);
+			free(a_head);
+			ft_free_array(a_head2, 4);
+			free(a_head2);
+			return (NULL);
+		}
+		ip[i] = n & n2;
+		ipv4++;
+		mask++;
+		i++;
+	}
+	s = malloc(sizeof(char *) * 1);
+	sprintf(s, "%d.%d.%d.%d", ip[0], ip[1], ip[2], ip[3]);
+	return (s);
+}
+
 int	main(int argc, char **argv)
 {
 	char	*ipv4_str;
+	char	*mask_str;
 	int		ret;
+	char	*ret2;
 
 	if (argc == 1)
 		return (EXIT_FAILURE);
-	ipv4_str = argv[1];
-	ret = ipv4_do(ipv4_str);
-	if (ret == -1)
+	if (argc == 3)
 	{
-		printf("%s is not a valid ipv4\n", ipv4_str);
-		return (EXIT_FAILURE);
+		ipv4_str = argv[1];
+		mask_str = argv[2];
+		ret2 = ipv4_do_mask(ipv4_str, mask_str);
+		if (!ret2)
+		{
+			printf("%s is not a valid ipv4\n", ipv4_str);
+			return (EXIT_FAILURE);
+		}
+		printf("Masked IP: %s\n", ret2);
+		free(ret2);
+		mask_str = argv[2];
+		ret = ipv4_do(mask_str);
+		if (ret == -1)
+		{
+			printf("%s is not a valid mask\n", mask_str);
+			return (EXIT_FAILURE);
+		}
+		printf("%s has a subnet mask: /%d\n", mask_str, ret);
+		printf("Number of possible hosts: %d\n", ((int)pow(2, 32 - ret) - 2));
 	}
-	printf("%s has a subnet mask: /%d\n", ipv4_str, ret);
-	printf("Number of possible hosts: %d\n", ((int)pow(2, 32 - ret) - 2));
+	else if (argc == 2)
+	{
+		ipv4_str = argv[1];
+		ret = ipv4_do(ipv4_str);
+		if (ret == -1)
+		{
+			printf("%s is not a valid ipv4\n", ipv4_str);
+			return (EXIT_FAILURE);
+		}
+		printf("%s has a subnet mask: /%d\n", ipv4_str, ret);
+		printf("Number of possible hosts: %d\n", ((int)pow(2, 32 - ret) - 2));
+	}
 	return (EXIT_SUCCESS);
 }
