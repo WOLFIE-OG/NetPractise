@@ -6,7 +6,7 @@
 /*   By: otodd <otodd@student.42london.com>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/11 18:01:21 by otodd             #+#    #+#             */
-/*   Updated: 2024/11/12 16:36:11 by otodd            ###   ########.fr       */
+/*   Updated: 2024/11/13 17:12:45 by otodd            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -199,11 +199,34 @@ static char	*ipv4_do_mask(char *str, char *str2)
 	return (s);
 }
 
+static char	*cidr_do(int n)
+{
+	char	*s;
+	int		i;
+	int		mask[4] = {0, 0, 0 ,0};
+	int		byte;
+	int		bit;
+
+	i = 0;
+	while (i < n)
+	{
+		byte = i / 8;
+		bit = 7 - (i % 8);
+		mask[byte] |= (1 << bit);
+		i++;
+	}
+
+	s = malloc(sizeof(char *) * 1);
+	sprintf(s, "%d.%d.%d.%d", mask[0], mask[1], mask[2], mask[3]);
+	return (s);
+}
+
 int	main(int argc, char **argv)
 {
 	char	*ipv4_str;
 	char	*mask_str;
 	int		ret;
+	int		i;
 	char	*ret2;
 
 	if (argc == 1)
@@ -227,20 +250,58 @@ int	main(int argc, char **argv)
 			printf("%s is not a valid mask\n", mask_str);
 			return (EXIT_FAILURE);
 		}
-		printf("%s has a subnet mask: /%d\n", mask_str, ret);
+		printf("%s has a cidr notation: /%d\n", mask_str, ret);
 		printf("Number of possible hosts: %d\n", ((int)pow(2, 32 - ret) - 2));
 	}
 	else if (argc == 2)
 	{
 		ipv4_str = argv[1];
-		ret = ipv4_do(ipv4_str);
-		if (ret == -1)
+		if (ipv4_str[0] == '/')
 		{
-			printf("%s is not a valid ipv4\n", ipv4_str);
-			return (EXIT_FAILURE);
+			mask_str = cidr_do(atoi(&ipv4_str[1]));
+			printf("%s has a subnet mask: %s\n", ipv4_str, mask_str);
+			free(mask_str);
 		}
-		printf("%s has a subnet mask: /%d\n", ipv4_str, ret);
-		printf("Number of possible hosts: %d\n", ((int)pow(2, 32 - ret) - 2));
+		else if (strcmp(ipv4_str, "s_range") == 0)
+		{
+			i = 0;
+			while (i <= 32)
+			{
+				mask_str = cidr_do(i);
+				printf("/%d has a subnet mask: %s\n", i, mask_str);
+				free(mask_str);
+				i++;
+			}
+		}
+		else if (strcmp(ipv4_str, "s_range_h") == 0)
+		{
+			i = 0;
+			while (i <= 32)
+			{
+				mask_str = cidr_do(i);
+				printf("/%d has a subnet mask: %s\n", i, mask_str);
+				ret = ipv4_do(mask_str);
+				if (ret == -1)
+				{
+					printf("%s is not a valid ipv4\n", ipv4_str);
+					return (EXIT_FAILURE);
+				}
+				printf("Number of possible hosts: %d\n\n", ((int)pow(2, 32 - ret) - 2));
+				free(mask_str);
+				i++;
+			}
+		}
+		else
+		{
+			ret = ipv4_do(ipv4_str);
+			if (ret == -1)
+			{
+				printf("%s is not a valid ipv4\n", ipv4_str);
+				return (EXIT_FAILURE);
+			}
+			printf("%s has a cidr notation: /%d\n", ipv4_str, ret);
+			printf("Number of possible hosts: %d\n", ((int)pow(2, 32 - ret) - 2));
+		}
 	}
 	return (EXIT_SUCCESS);
 }
